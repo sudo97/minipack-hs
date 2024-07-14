@@ -1,4 +1,4 @@
-module Asset where
+module Asset (Asset (..), transpile, mkAsset) where
 
 import qualified Data.Map as M
 import Language.JavaScript.Parser
@@ -96,11 +96,6 @@ transformImportDecl (JSImportDeclarationBare _ moduleName _) =
 identToString :: JSIdent -> String
 identToString (JSIdentName _ name) = name
 identToString JSIdentNone = error "Invalid identifier"
-
-fromCommaList :: JSCommaList a -> [a]
-fromCommaList (JSLOne x) = [x]
-fromCommaList (JSLCons xs _ x) = fromCommaList xs ++ [x]
-fromCommaList JSLNil = []
 
 fromClauseToString :: JSFromClause -> String
 fromClauseToString (JSFromClause _ _ str) = str
