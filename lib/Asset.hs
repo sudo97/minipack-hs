@@ -83,7 +83,38 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
     ]
   JSImportClauseNameSpace (JSImportNameSpace _ _ _ident) -> error "Not implemented, JSImportClauseNameSpace"
   JSImportClauseDefaultNameSpace _ident _ (JSImportNameSpace _ _ _nsIdent) -> error "Not implemented, JSImportClauseDefaultNameSpace"
-  JSImportClauseDefaultNamed _ident _ (JSImportsNamed _ _specifiers _) -> error "Not implemented, JSImportClauseDefaultNamed"
+  JSImportClauseDefaultNamed ident _ (JSImportsNamed _ specifiers _) ->
+    [ JSConstant
+        JSNoAnnot
+        ( JSLOne
+            ( JSVarInitExpression
+                ( JSObjectLiteral
+                    JSAnnotSpace
+                    ( commaListToCommaTrailing $
+                        JSLCons
+                          (mapCommaList importSpecifierToObjectProperty specifiers)
+                          JSNoAnnot
+                          ( JSPropertyNameandValue
+                              (JSPropertyIdent JSAnnotSpace "default")
+                              JSNoAnnot
+                              [JSIdentifier JSAnnotSpace (identToString ident)]
+                          )
+                    )
+                    JSAnnotSpace
+                )
+                ( JSVarInit
+                    JSAnnotSpace
+                    ( JSMemberExpression
+                        (JSIdentifier JSAnnotSpace "require")
+                        JSNoAnnot
+                        (JSLOne (JSStringLiteral JSNoAnnot (fromClauseToString from)))
+                        JSNoAnnot
+                    )
+                )
+            )
+        )
+        (JSSemi JSNoAnnot)
+    ]
 transformImportDecl (JSImportDeclarationBare _ moduleName _) =
   [ JSExpressionStatement
       ( JSCallExpression
