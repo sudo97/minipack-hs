@@ -47,12 +47,7 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
                 (JSIdentifier JSAnnotSpace (identToString ident))
                 ( JSVarInit
                     JSAnnotSpace
-                    ( JSCallExpression
-                        (JSIdentifier JSAnnotSpace "require")
-                        JSNoAnnot
-                        (JSLOne (JSStringLiteral JSNoAnnot (fromClauseToString from)))
-                        JSNoAnnot
-                    )
+                    (require (fromClauseToString from) JSAnnotSpace)
                 )
             )
         )
@@ -70,11 +65,7 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
                 )
                 ( JSVarInit
                     JSAnnotSpace
-                    ( JSMemberExpression
-                        (JSIdentifier JSAnnotSpace "require")
-                        JSNoAnnot
-                        (JSLOne (JSStringLiteral JSNoAnnot (fromClauseToString from)))
-                        JSNoAnnot
+                    ( require (fromClauseToString from) JSAnnotSpace
                     )
                 )
             )
@@ -104,27 +95,21 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
                 )
                 ( JSVarInit
                     JSAnnotSpace
-                    ( JSCallExpression
-                        (JSIdentifier JSAnnotSpace "require")
-                        JSNoAnnot
-                        (JSLOne (JSStringLiteral JSNoAnnot (fromClauseToString from)))
-                        JSNoAnnot
-                    )
+                    (require (fromClauseToString from) JSAnnotSpace)
                 )
             )
         )
         (JSSemi JSNoAnnot)
     ]
-transformImportDecl (JSImportDeclarationBare _ moduleName _) =
-  [ JSExpressionStatement
-      ( JSCallExpression
-          (JSIdentifier JSNoAnnot "require")
-          JSNoAnnot
-          (JSLOne (JSStringLiteral JSNoAnnot moduleName))
-          JSNoAnnot
-      )
-      (JSSemi JSNoAnnot)
-  ]
+transformImportDecl (JSImportDeclarationBare _ moduleName _) = [JSExpressionStatement (require moduleName JSNoAnnot) (JSSemi JSNoAnnot)]
+
+require :: String -> JSAnnot -> JSExpression
+require moduleName annot =
+  JSCallExpression
+    (JSIdentifier annot "require")
+    JSNoAnnot
+    (JSLOne (JSStringLiteral JSNoAnnot moduleName))
+    JSNoAnnot
 
 importSpecifierToObjectProperty :: JSImportSpecifier -> JSObjectProperty
 importSpecifierToObjectProperty (JSImportSpecifier ident) = JSPropertyIdentRef JSAnnotSpace (identToString ident)
