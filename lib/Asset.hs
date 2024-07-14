@@ -47,7 +47,7 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
                 (JSIdentifier JSAnnotSpace (identToString ident))
                 ( JSVarInit
                     JSAnnotSpace
-                    ( JSMemberExpression
+                    ( JSCallExpression
                         (JSIdentifier JSAnnotSpace "require")
                         JSNoAnnot
                         (JSLOne (JSStringLiteral JSNoAnnot (fromClauseToString from)))
@@ -56,7 +56,7 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
                 )
             )
         )
-        (JSSemi JSNoAnnot)
+        (JSSemi JSAnnotSpace)
     ]
   JSImportClauseNamed (JSImportsNamed _ specifiers _) ->
     [ JSConstant
@@ -95,7 +95,7 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
                           (mapCommaList importSpecifierToObjectProperty specifiers)
                           JSNoAnnot
                           ( JSPropertyNameandValue
-                              (JSPropertyIdent JSAnnotSpace "default")
+                              (JSPropertyIdent JSAnnotSpace "_default")
                               JSNoAnnot
                               [JSIdentifier JSAnnotSpace (identToString ident)]
                           )
@@ -104,7 +104,7 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
                 )
                 ( JSVarInit
                     JSAnnotSpace
-                    ( JSMemberExpression
+                    ( JSCallExpression
                         (JSIdentifier JSAnnotSpace "require")
                         JSNoAnnot
                         (JSLOne (JSStringLiteral JSNoAnnot (fromClauseToString from)))
