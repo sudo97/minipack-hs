@@ -19,21 +19,23 @@ mkAsset path content id' = do
   deps <- imports mdl
   pure $ Asset {aId = id', aPath = path, aContent = transpile mdl, aMapping = M.empty, aDependencies = deps}
 
-importSpecifierToObjectProperty :: JSImportSpecifier -> JSObjectProperty
-importSpecifierToObjectProperty (JSImportSpecifier ident) = JSPropertyIdentRef JSAnnotSpace (identToString ident)
-importSpecifierToObjectProperty (JSImportSpecifierAs ident _ alias) =
-  JSPropertyNameandValue
-    (JSPropertyIdent JSAnnotSpace (identToString ident))
-    JSNoAnnot
-    [JSIdentifier JSAnnotSpace (identToString alias)]
+imports :: JSAST -> Either String [String]
+imports (JSAstModule stmts _) = mapM toImpString (filter isImport stmts)
+  where
+    toImpString (JSModuleImportDeclaration _ (JSImportDeclaration _ (JSFromClause _ _ res) _)) = pure res
+    toImpString _ = Left "Invalid import declaration"
+    isImport (JSModuleImportDeclaration _ _) = True
+    isImport _ = False
+imports _ = pure []
 
-mapCommaList :: (a -> b) -> JSCommaList a -> JSCommaList b
-mapCommaList f (JSLOne x) = JSLOne (f x)
-mapCommaList f (JSLCons xs _ x) = JSLCons (mapCommaList f xs) JSNoAnnot (f x)
-mapCommaList _ JSLNil = JSLNil
+transpile :: JSAST -> JSAST
+transpile (JSAstModule items _) = JSAstModule (concatMap transformImport items) JSNoAnnot
+transpile _ = error "I'm not implemented"
 
-commaListToCommaTrailing :: JSCommaList a -> JSCommaTrailingList a
-commaListToCommaTrailing = JSCTLNone
+transformImport :: JSModuleItem -> [JSModuleItem]
+transformImport (JSModuleImportDeclaration _ decl) = JSModuleStatementListItem <$> transformImportDecl decl
+transformImport (JSModuleExportDeclaration _ _) = error "Fixme: exports are not supported"
+transformImport stmt = [stmt]
 
 transformImportDecl :: JSImportDeclaration -> [JSStatement]
 transformImportDecl (JSImportDeclaration clause from _) = case clause of
@@ -93,27 +95,25 @@ transformImportDecl (JSImportDeclarationBare _ moduleName _) =
       (JSSemi JSNoAnnot)
   ]
 
+importSpecifierToObjectProperty :: JSImportSpecifier -> JSObjectProperty
+importSpecifierToObjectProperty (JSImportSpecifier ident) = JSPropertyIdentRef JSAnnotSpace (identToString ident)
+importSpecifierToObjectProperty (JSImportSpecifierAs ident _ alias) =
+  JSPropertyNameandValue
+    (JSPropertyIdent JSAnnotSpace (identToString ident))
+    JSNoAnnot
+    [JSIdentifier JSAnnotSpace (identToString alias)]
+
+mapCommaList :: (a -> b) -> JSCommaList a -> JSCommaList b
+mapCommaList f (JSLOne x) = JSLOne (f x)
+mapCommaList f (JSLCons xs _ x) = JSLCons (mapCommaList f xs) JSNoAnnot (f x)
+mapCommaList _ JSLNil = JSLNil
+
+commaListToCommaTrailing :: JSCommaList a -> JSCommaTrailingList a
+commaListToCommaTrailing = JSCTLNone
+
 identToString :: JSIdent -> String
 identToString (JSIdentName _ name) = name
 identToString JSIdentNone = error "Invalid identifier"
 
 fromClauseToString :: JSFromClause -> String
 fromClauseToString (JSFromClause _ _ str) = str
-
-transformImport :: JSModuleItem -> [JSModuleItem]
-transformImport (JSModuleImportDeclaration _ decl) = JSModuleStatementListItem <$> transformImportDecl decl
-transformImport (JSModuleExportDeclaration _ _) = error "Fixme: exports are not supported"
-transformImport stmt = [stmt]
-
-transpile :: JSAST -> JSAST
-transpile (JSAstModule items _) = JSAstModule (concatMap transformImport items) JSNoAnnot
-transpile _ = error "I'm not implemented"
-
-imports :: JSAST -> Either String [String]
-imports (JSAstModule stmts _) = mapM toImpString (filter isImport stmts)
-  where
-    toImpString (JSModuleImportDeclaration _ (JSImportDeclaration _ (JSFromClause _ _ res) _)) = pure res
-    toImpString _ = Left "Invalid import declaration"
-    isImport (JSModuleImportDeclaration _ _) = True
-    isImport _ = False
-imports _ = pure []
