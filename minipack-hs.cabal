@@ -57,7 +57,7 @@ library minipack-lib
         -- Import common warning flags.
     import:           warnings
 
-    exposed-modules: Asset, Transpile
+    exposed-modules: Asset, Transpile, Graph
     hs-source-dirs:   lib
     default-language: Haskell2010
 
