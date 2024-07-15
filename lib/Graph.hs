@@ -7,6 +7,8 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except
 import Data.Foldable (find)
 import Data.IORef
+import Data.List (intercalate)
+import Language.JavaScript.Parser
 import System.Directory
 import System.FilePath
 
@@ -70,3 +72,39 @@ createAsset path id' = do
   path' <- liftIO $ canonicalizePath path
   contents <- liftIO $ readFile path'
   liftEither $ mkAsset path contents id'
+
+bundle :: [(Asset, [(String, Int)])] -> String
+bundle [] = ""
+bundle [(asset, _)] = renderToString (aContent asset)
+bundle xs = do
+  let result =
+        foldl
+          ( \acc (asset, mapping) ->
+              acc
+                ++ show (aId asset)
+                ++ ": [\n"
+                ++ "function (require, module) {\n"
+                ++ renderToString (aContent asset)
+                ++ "\n},\n"
+                ++ asJSON mapping
+                ++ "\n],\n"
+          )
+          ""
+          xs
+   in "(function(modules) {\n"
+        ++ "function require(id) {\n"
+        ++ "const [fn, mapping] = modules[id];\n\n"
+        ++ "function localRequire(name) {\n"
+        ++ "return require(mapping[name]);\n}\n\n"
+        ++ "const module = {};\n\n"
+        ++ "fn(localRequire, module);\n\n"
+        ++ "return module;\n}\n\n"
+        ++ "require(0);\n"
+        ++ "})({"
+        ++ result
+        ++ "})"
+
+asJSON :: [(String, Int)] -> String
+asJSON [] = "{}"
+asJSON [(x, y)] = "{" ++ show x ++ ": " ++ show y ++ "}"
+asJSON xs = "{" ++ intercalate ", " (map (\(x, y) -> show x ++ ": " ++ show y) xs) ++ "}"

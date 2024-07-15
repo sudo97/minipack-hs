@@ -4,7 +4,7 @@ import { name, basinga } from "./other_dir/other_file.js";
 Hello_world();
 
 console.log(name);
-basinga();
+console.log(basinga());
 
 export const a = 1;
 

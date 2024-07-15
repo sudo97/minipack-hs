@@ -1,7 +1,5 @@
 module Main where
 
-import Asset
-import Control.Monad
 import Control.Monad.IO.Class (liftIO)
 import Control.Monad.Trans.Except
 import Graph
@@ -20,9 +18,4 @@ main = do
       pure ()
 
 printGraph :: String -> GraphM ()
-printGraph path = do
-  graph <- createGraph path
-  forM_ graph $ \(asset, mapping) -> liftIO $ do
-    putStrLn $ aPath asset
-    print mapping
-    putStrLn ""
+printGraph path = createGraph path >>= (liftIO . putStrLn . bundle)
