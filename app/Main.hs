@@ -10,20 +10,6 @@ import Language.JavaScript.Parser (renderToString)
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
 
--- import System.FilePath
-
--- type BundleMonad = ExceptT String IO
-
--- bundle :: String -> String -> IO ()
--- bundle content entrypoint = do
---   case parseModule content entrypoint of
---     Left e -> do
---       putStrLn $ "Error: " ++ show e
---     Right modl -> do
---       putStrLn $ "Module: " ++ show modl
---       putStrLn "Imports: "
---       traverse_ putStrLn (imports modl)
-
 main :: IO ()
 main = do
   args <- getArgs

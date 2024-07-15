@@ -1,5 +1,5 @@
 import { Hello_world } from "./dir/file.js";
-import basinga, { name } from "./other_dir/other_file.js";
+import { name, basinga } from "./other_dir/other_file.js";
 
 Hello_world();
 
