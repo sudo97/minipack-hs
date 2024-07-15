@@ -17,7 +17,7 @@ mkAsset :: String -> String -> Int -> Either String Asset
 mkAsset path content id' = do
   mdl <- parseModule content path
   deps <- imports mdl
-  pure $ Asset {aId = id', aPath = path, aContent = transpile mdl, aMapping = M.empty, aDependencies = deps}
+  pure Asset {aId = id', aPath = path, aContent = transpile mdl, aMapping = M.empty, aDependencies = deps}
 
 imports :: JSAST -> Either String [String]
 imports (JSAstModule stmts _) = mapM toImpString (filter isImport stmts)
