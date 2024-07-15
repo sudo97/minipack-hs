@@ -14,8 +14,7 @@ main = do
       putStrLn "Usage: js-parser <entrypoint>"
       exitFailure
     (entrypoint : _) -> do
-      _ <- runExceptT $ printGraph entrypoint
-      pure ()
-
-printGraph :: String -> GraphM ()
-printGraph path = createGraph path >>= (liftIO . putStrLn . bundle)
+      result <- runExceptT $ createGraph entrypoint >>= (liftIO . putStrLn . bundle)
+      case result of
+        Left err -> putStrLn err
+        Right _ -> pure ()
