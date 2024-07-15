@@ -34,5 +34,7 @@ main = do
     (entrypoint : _) -> do
       content <- readFile entrypoint
       case mkAsset entrypoint content 0 of
-        Right asset -> print asset *> (putStrLn . renderToString . aContent $ asset)
+        Right asset -> do
+          -- print asset
+          putStrLn . renderToString . aContent $ asset
         Left e -> print e

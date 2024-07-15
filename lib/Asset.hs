@@ -34,7 +34,7 @@ transpile _ = error "I'm not implemented"
 
 transformImport :: JSModuleItem -> [JSModuleItem]
 transformImport (JSModuleImportDeclaration _ decl) = JSModuleStatementListItem <$> transformImportDecl decl
-transformImport (JSModuleExportDeclaration _ _) = error "Fixme: exports are not supported"
+transformImport (JSModuleExportDeclaration _ decl) = JSModuleStatementListItem <$> transformExportDecl decl
 transformImport stmt = [stmt]
 
 transformImportDecl :: JSImportDeclaration -> [JSStatement]
@@ -162,3 +162,34 @@ identToString JSIdentNone = error "Invalid identifier"
 
 fromClauseToString :: JSFromClause -> String
 fromClauseToString (JSFromClause _ _ str) = str
+
+transformExportDecl :: JSExportDeclaration -> [JSStatement]
+transformExportDecl (JSExport stmt _) =
+  stmt
+    : JSEmptyStatement JSNoAnnot
+    : case stmt of
+      JSConstant _ expList _ -> map exportStmt $ getIdentNames expList
+      JSLet _ expList _ -> map exportStmt $ getIdentNames expList
+      JSFunction _ (JSIdentName _ ident) _ _ _ _ _ -> [exportStmt ident]
+      JSClass _ (JSIdentName _ ident) _ _ _ _ _ -> [exportStmt ident]
+      _ -> []
+transformExportDecl _ = []
+
+exportStmt :: String -> JSStatement
+exportStmt ident =
+  JSAssignStatement
+    ( JSMemberDot
+        (JSIdentifier JSAnnotSpace "module")
+        JSNoAnnot
+        (JSIdentifier JSNoAnnot ident)
+    )
+    (JSAssign JSAnnotSpace)
+    (JSIdentifier JSAnnotSpace ident)
+    (JSSemi JSNoAnnot)
+
+getIdentNames :: JSCommaList JSExpression -> [String]
+getIdentNames JSLNil = []
+getIdentNames (JSLOne (JSVarInitExpression (JSIdentifier _ ident) _)) = [ident]
+getIdentNames (JSLOne _) = []
+getIdentNames (JSLCons lst _ (JSVarInitExpression (JSIdentifier _ ident) _)) = ident : getIdentNames lst
+getIdentNames (JSLCons lst _ _) = getIdentNames lst

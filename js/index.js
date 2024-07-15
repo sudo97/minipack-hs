@@ -7,3 +7,7 @@ console.log(name);
 basinga();
 
 export const a = 1;
+
+export function f() {
+  console.log(a);
+}
