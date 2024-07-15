@@ -33,8 +33,7 @@ createGraph filePath = do
               absolutePath <- liftIO $ canonicalizePath $ dirname </> dep
               visited' <- liftIO $ readIORef visited
               case find ((== absolutePath) . aPath) visited' of
-                Just child -> do
-                  pure (dep, aId child)
+                Just child -> pure (dep, aId child)
                 Nothing -> do
                   child <- createAsset absolutePath =<< liftIO (readIORef counter)
                   counter += 1
