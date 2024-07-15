@@ -44,14 +44,34 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
         JSNoAnnot
         ( JSLOne
             ( JSVarInitExpression
-                (JSIdentifier JSAnnotSpace (identToString ident))
+                ( JSObjectLiteral
+                    JSAnnotSpace
+                    ( commaListToCommaTrailing $
+                        JSLOne
+                          ( JSPropertyNameandValue
+                              ( JSPropertyComputed
+                                  JSNoAnnot
+                                  ( JSMemberExpression
+                                      (JSIdentifier JSNoAnnot "Symbol")
+                                      JSNoAnnot
+                                      (JSLOne (JSStringLiteral JSNoAnnot "'default'"))
+                                      JSNoAnnot
+                                  )
+                                  JSNoAnnot
+                              )
+                              JSNoAnnot
+                              [JSIdentifier JSAnnotSpace (identToString ident)]
+                          )
+                    )
+                    JSNoAnnot
+                )
                 ( JSVarInit
                     JSAnnotSpace
                     (require (fromClauseToString from) JSAnnotSpace)
                 )
             )
         )
-        (JSSemi JSAnnotSpace)
+        (JSSemi JSNoAnnot)
     ]
   JSImportClauseNamed (JSImportsNamed _ specifiers _) ->
     [ JSConstant
@@ -86,7 +106,16 @@ transformImportDecl (JSImportDeclaration clause from _) = case clause of
                           (mapCommaList importSpecifierToObjectProperty specifiers)
                           JSNoAnnot
                           ( JSPropertyNameandValue
-                              (JSPropertyIdent JSAnnotSpace "_default")
+                              ( JSPropertyComputed
+                                  JSNoAnnot
+                                  ( JSMemberExpression
+                                      (JSIdentifier JSNoAnnot "Symbol")
+                                      JSNoAnnot
+                                      (JSLOne (JSStringLiteral JSNoAnnot "'default'"))
+                                      JSNoAnnot
+                                  )
+                                  JSNoAnnot
+                              )
                               JSNoAnnot
                               [JSIdentifier JSAnnotSpace (identToString ident)]
                           )
