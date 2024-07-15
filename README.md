@@ -24,6 +24,10 @@ To use the minipack-hs executable, run:
 cabal run minipack-hs -- <entry_point> > output.js
 ```
 
+## Differences to minipack-rs
+
+1. It's in a garbage collected language, which made it much easier to tackle
+1. language-javascript has no transpillation possibilities, so I had to hack my own transpiler for imports and exports.
 
 ## Project Structure
 
