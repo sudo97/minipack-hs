@@ -1,4 +1,4 @@
-module Asset (Asset (..), transpile, mkAsset) where
+module Asset (Asset (..), mkAsset) where
 
 import qualified Data.Map as M
 import Language.JavaScript.Parser
