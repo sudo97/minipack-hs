@@ -1,3 +1,3 @@
 export const name = "John";
 
-export default () => "Bazinga!";
+export const basinga = () => "Bazinga!";

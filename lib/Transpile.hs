@@ -6,7 +6,7 @@ import Language.JavaScript.Parser.AST
 imports :: JSAST -> Either String [String]
 imports (JSAstModule stmts _) = mapM toImpString (filter isImport stmts)
   where
-    toImpString (JSModuleImportDeclaration _ (JSImportDeclaration _ (JSFromClause _ _ res) _)) = pure res
+    toImpString (JSModuleImportDeclaration _ (JSImportDeclaration _ (JSFromClause _ _ res) _)) = pure (read res)
     toImpString _ = Left "Invalid import declaration"
     isImport (JSModuleImportDeclaration _ _) = True
     isImport _ = False
